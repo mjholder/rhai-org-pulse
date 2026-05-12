@@ -387,6 +387,100 @@ app.delete('/api/admin/messages/:id', requireAdmin, function(req, res) {
   res.status(204).end();
 });
 
+// ─── Routes: Backups ───
+
+const backup = require('../shared/server/backup');
+
+let backupRunning = false;
+
+/**
+ * @openapi
+ * /api/admin/backup:
+ *   post:
+ *     tags: [Backup]
+ *     summary: Trigger a data backup to S3 (admin only)
+ *     responses:
+ *       200:
+ *         description: Backup created successfully
+ *       409:
+ *         description: Backup already in progress
+ */
+app.post('/api/admin/backup', requireAdmin, async function(req, res) {
+  if (backupRunning) {
+    return res.status(409).json({ error: 'Backup already in progress' });
+  }
+  backupRunning = true;
+  try {
+    const result = await backup.createBackup();
+    const retention = await backup.applyRetention();
+    res.json({ ...result, deleted: retention.deleted });
+  } catch (error) {
+    console.error('[backup] Backup failed:', error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    backupRunning = false;
+  }
+});
+
+/**
+ * @openapi
+ * /api/admin/backup:
+ *   get:
+ *     tags: [Backup]
+ *     summary: List available backups (admin only)
+ *     responses:
+ *       200:
+ *         description: List of backups
+ */
+app.get('/api/admin/backup', requireAdmin, async function(req, res) {
+  try {
+    const backups = await backup.listBackups();
+    res.json({ backups });
+  } catch (error) {
+    console.error('[backup] List failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @openapi
+ * /api/admin/backup/restore:
+ *   post:
+ *     tags: [Backup]
+ *     summary: Restore data from an S3 backup (admin only)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [key]
+ *             properties:
+ *               key:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Restore completed
+ *       400:
+ *         description: Invalid or missing key
+ */
+app.post('/api/admin/backup/restore', requireAdmin, blockDuringImpersonation, async function(req, res) {
+  const { key } = req.body || {};
+  if (!key || typeof key !== 'string') {
+    return res.status(400).json({ error: 'key is required' });
+  }
+  if (!key.startsWith('team-tracker/backup-')) {
+    return res.status(400).json({ error: 'Invalid backup key format' });
+  }
+  try {
+    const result = await backup.restoreBackup(key);
+    res.json(result);
+  } catch (error) {
+    console.error('[backup] Restore failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── Routes: API Tokens ───
 
 /**
