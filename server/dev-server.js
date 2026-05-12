@@ -393,6 +393,18 @@ const backup = require('../shared/server/backup');
 
 let backupRunning = false;
 
+/**
+ * @openapi
+ * /api/admin/backup:
+ *   post:
+ *     tags: [Backup]
+ *     summary: Trigger a data backup to S3 (admin only)
+ *     responses:
+ *       200:
+ *         description: Backup created successfully
+ *       409:
+ *         description: Backup already in progress
+ */
 app.post('/api/admin/backup', requireAdmin, async function(req, res) {
   if (backupRunning) {
     return res.status(409).json({ error: 'Backup already in progress' });
@@ -410,6 +422,16 @@ app.post('/api/admin/backup', requireAdmin, async function(req, res) {
   }
 });
 
+/**
+ * @openapi
+ * /api/admin/backup:
+ *   get:
+ *     tags: [Backup]
+ *     summary: List available backups (admin only)
+ *     responses:
+ *       200:
+ *         description: List of backups
+ */
 app.get('/api/admin/backup', requireAdmin, async function(req, res) {
   try {
     const backups = await backup.listBackups();
@@ -420,10 +442,35 @@ app.get('/api/admin/backup', requireAdmin, async function(req, res) {
   }
 });
 
-app.post('/api/admin/backup/restore', requireAdmin, async function(req, res) {
+/**
+ * @openapi
+ * /api/admin/backup/restore:
+ *   post:
+ *     tags: [Backup]
+ *     summary: Restore data from an S3 backup (admin only)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [key]
+ *             properties:
+ *               key:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Restore completed
+ *       400:
+ *         description: Invalid or missing key
+ */
+app.post('/api/admin/backup/restore', requireAdmin, blockDuringImpersonation, async function(req, res) {
   const { key } = req.body || {};
   if (!key || typeof key !== 'string') {
     return res.status(400).json({ error: 'key is required' });
+  }
+  if (!key.startsWith('team-tracker/backup-')) {
+    return res.status(400).json({ error: 'Invalid backup key format' });
   }
   try {
     const result = await backup.restoreBackup(key);

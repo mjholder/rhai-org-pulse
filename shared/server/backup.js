@@ -9,6 +9,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { pipeline } = require('stream/promises');
 const { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 const DATA_DIR = path.join(__dirname, '..', '..', 'data');
@@ -33,7 +34,7 @@ function formatDate(date) {
   return date.toISOString().replace(/[:.]/g, '-').slice(0, 19);
 }
 
-function issunday(dateStr) {
+function isSunday(dateStr) {
   const d = new Date(dateStr.replace(/T.*/, ''));
   return d.getUTCDay() === 0;
 }
@@ -61,7 +62,7 @@ async function createBackup() {
 
     // Upload to S3
     const { client, bucket } = getS3Client();
-    const body = fs.readFileSync(tmpFile);
+    const body = fs.createReadStream(tmpFile);
     await client.send(new PutObjectCommand({
       Bucket: bucket,
       Key: s3Key,
@@ -131,7 +132,7 @@ async function applyRetention() {
 
   // Keep Sunday backups within the weekly retention window
   for (const b of backups) {
-    if (new Date(b.date) >= cutoffDate && issunday(b.date)) {
+    if (new Date(b.date) >= cutoffDate && isSunday(b.date)) {
       toKeep.add(b.key);
     }
   }
@@ -171,12 +172,7 @@ async function restoreBackup(key) {
       Key: key,
     }));
 
-    // Stream the response body to a temp file
-    const chunks = [];
-    for await (const chunk of resp.Body) {
-      chunks.push(chunk);
-    }
-    fs.writeFileSync(tmpFile, Buffer.concat(chunks));
+    await pipeline(resp.Body, fs.createWriteStream(tmpFile));
 
     console.log(`[backup] Downloaded s3://${bucket}/${key}`);
 
