@@ -387,6 +387,53 @@ app.delete('/api/admin/messages/:id', requireAdmin, function(req, res) {
   res.status(204).end();
 });
 
+// ─── Routes: Backups ───
+
+const backup = require('../shared/server/backup');
+
+let backupRunning = false;
+
+app.post('/api/admin/backup', requireAdmin, async function(req, res) {
+  if (backupRunning) {
+    return res.status(409).json({ error: 'Backup already in progress' });
+  }
+  backupRunning = true;
+  try {
+    const result = await backup.createBackup();
+    const retention = await backup.applyRetention();
+    res.json({ ...result, deleted: retention.deleted });
+  } catch (error) {
+    console.error('[backup] Backup failed:', error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    backupRunning = false;
+  }
+});
+
+app.get('/api/admin/backup', requireAdmin, async function(req, res) {
+  try {
+    const backups = await backup.listBackups();
+    res.json({ backups });
+  } catch (error) {
+    console.error('[backup] List failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/admin/backup/restore', requireAdmin, async function(req, res) {
+  const { key } = req.body || {};
+  if (!key || typeof key !== 'string') {
+    return res.status(400).json({ error: 'key is required' });
+  }
+  try {
+    const result = await backup.restoreBackup(key);
+    res.json(result);
+  } catch (error) {
+    console.error('[backup] Restore failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ─── Routes: API Tokens ───
 
 /**
