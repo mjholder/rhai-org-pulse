@@ -450,10 +450,13 @@ This makes rfe-assessor the single CI hub for all three AI Impact data types:
 
 ### 2. criterionNotes Gap
 
-`TestPlanReview.md` stores criterion-level feedback in the markdown body, not in frontmatter fields. The push script will send empty `criterionNotes` initially. To populate this:
+**Status**: Tracked in odh-test-gen [#20](https://github.com/opendatahub-io/odh-test-gen/issues/20)
 
-- The `/test-plan-create` skill's review phase would need to write per-criterion notes into the frontmatter (e.g., `criterion_notes.specificity: "..."`)
-- Alternatively, the push script could parse the markdown body to extract criterion commentary — fragile but avoids skill changes
+`TestPlanReview.md` stores criterion-level feedback in the markdown body, not in frontmatter fields. The push script will send empty `criterionNotes` initially, which means the org-pulse UI shows "No notes available" when users expand dimension scores in the Test Plan Detail panel.
+
+**Recommended solution**: Modify `/test-plan-create` skill's review phase to write per-criterion notes into structured frontmatter fields (e.g., `criterion_notes.specificity: "..."`). The org-pulse API already validates and stores this field.
+
+**Impact**: Low priority — nice-to-have enhancement for transparency. The dashboard works without it.
 
 ### 3. Pipeline Timeline Wiring from Parent Views
 
