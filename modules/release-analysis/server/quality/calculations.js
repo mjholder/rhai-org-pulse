@@ -46,14 +46,14 @@ function computeCumulativeBugData(bugs, versions, storage) {
   const labels = Array.from({ length: maxDays + 1 }, (_, i) => i);
 
   const datasets = versions.map(version => {
-    const bugs = versionBugs.get(version) || [];
+    const entries = versionBugs.get(version) || [];
     const data = new Array(maxDays + 1).fill(0);
 
     let cumulativeCount = 0;
     let bugIndex = 0;
 
     for (let day = 0; day <= maxDays; day++) {
-      while (bugIndex < bugs.length && bugs[bugIndex].daysSinceRelease === day) {
+      while (bugIndex < entries.length && entries[bugIndex].daysSinceRelease === day) {
         cumulativeCount++;
         bugIndex++;
       }
