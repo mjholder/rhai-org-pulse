@@ -19,7 +19,7 @@ async function fetchVersions(projects, { jiraFetch } = {}) {
         }
       }
     } catch (error) {
-      console.warn(`[quality-metrics] Failed to fetch versions for ${project}:`, error.message);
+      console.warn(`[release-analysis/quality] Failed to fetch versions for ${project}:`, error.message);
     }
   }
 
@@ -99,33 +99,10 @@ async function fetchBugs(project, versions, { jiraFetchAll } = {}) {
       bug.releaseDate && new Date(bug.created) >= new Date(bug.releaseDate)
     );
   } catch (error) {
-    console.error(`[quality-metrics] Failed to fetch bugs for ${project}:`, error.message);
+    console.error(`[release-analysis/quality] Failed to fetch bugs for ${project}:`, error.message);
     return [];
   }
 }
 
-/**
- * Fetch all unique components from specified projects
- * @param {string[]} projects - Project keys
- * @returns {Promise<Array>} - Sorted component names
- */
-async function getComponents(projects, { jiraFetch } = {}) {
-  const request = jiraFetch || jira.jiraRequest;
-  const componentSet = new Set();
-
-  for (const project of projects) {
-    try {
-      const data = await request(`/rest/api/3/project/${project}/components`);
-      for (const comp of data) {
-        componentSet.add(comp.name);
-      }
-    } catch (error) {
-      console.warn(`[quality-metrics] Failed to fetch components for ${project}:`, error.message);
-    }
-  }
-
-  return Array.from(componentSet).sort();
-}
-
-module.exports = { fetchVersions, fetchBugs, getComponents };
+module.exports = { fetchVersions, fetchBugs };
 
