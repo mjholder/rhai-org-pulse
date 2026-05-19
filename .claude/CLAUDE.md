@@ -242,6 +242,7 @@ All routes prefixed with `/api`. Authenticated via OAuth proxy in production.
 - `/api/modules/team-tracker/org-teams/:teamKey/members` — team members
 - `/api/modules/team-tracker/permissions/me` — permission tier + managed UIDs
 - `/api/modules/team-tracker/manager/dashboard` — manager dashboard data
+- `/api/modules/team-tracker/admin/field-completeness` — all people/teams with field data for data quality auditing (team-admin/admin)
 - `/api/modules/team-tracker/structure/teams` — list teams
 - `/api/modules/team-tracker/structure/unassigned` — unassigned people
 - `/api/modules/team-tracker/structure/field-definitions` — field definitions
@@ -380,6 +381,7 @@ All routes prefixed with `/api`. Authenticated via OAuth proxy in production.
 - `/api/tokens/:id/scopes` — update own token scopes
 - `/api/admin/tokens/:id/scopes` — update any token scopes (admin)
 - `/api/modules/team-tracker/structure/teams/:teamId` — rename team (admin/team-admin)
+- `/api/modules/team-tracker/structure/teams/:teamId/description` — update team description (team-purview)
 - `/api/modules/team-tracker/structure/field-definitions/person/:fieldId` — edit field def (admin/team-admin)
 - `/api/modules/team-tracker/structure/field-definitions/team/:fieldId` — edit field def (admin/team-admin)
 - `/api/modules/team-tracker/structure/person/:uid/fields` — update person fields (manager/admin)
