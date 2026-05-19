@@ -118,8 +118,8 @@ test.describe('System Health Disabled Menu Items @system-health', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(DEFAULT_PAGE_WAIT_TIME);
 
-    // Count disabled navigation items
-    const disabledCount = await countDisabledNavItems(page);
+    // Count disabled navigation items within the System Health section only
+    const disabledCount = await countDisabledNavItems(page, 'System Health');
 
     // System Health module should have no disabled menu items
     expect(disabledCount).toBe(0);
@@ -190,7 +190,7 @@ test.describe('System Health Views @system-health', () => {
       console.log(`Found column: "${columnName}"`);
     }
 
-    // Verify column roder
+    // Verify column order
     const allHeaders = await table.locator('th, thead td, [role="columnheader"]').allTextContents();
     console.log('All table headers:', allHeaders);
 

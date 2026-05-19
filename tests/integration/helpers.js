@@ -98,10 +98,14 @@ async function mainContentIsVisible(page) {
  * - CSS styles (cursor: not-allowed, pointer-events: none)
  *
  * @param {import('@playwright/test').Page} page - Playwright page object
+ * @param {string} [sectionName] - Optional module section name to scope the check (e.g. 'System Health')
  * @returns {Promise<number>} - Count of disabled navigation items
  */
-async function countDisabledNavItems(page) {
-  const navButtons = page.locator('aside nav button');
+async function countDisabledNavItems(page, sectionName) {
+  const scope = sectionName
+    ? page.locator('aside nav > div').filter({ hasText: sectionName })
+    : page.locator('aside nav');
+  const navButtons = scope.locator('button');
   const count = await navButtons.count();
 
   let disabledCount = 0;
