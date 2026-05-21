@@ -305,6 +305,7 @@ All routes prefixed with `/api`. Authenticated via OAuth proxy in production.
 - `/api/modules/ai-impact/component-onboarding/:key` — single component onboarding entry + history
 - `/api/modules/ai-impact/component-onboarding/status` — component onboarding data status (admin)
 - `/api/modules/product-builds/config` — AIPCC Dashboard API configuration (admin)
+- `/api/modules/product-builds/health` — AIPCC Dashboard API connectivity check
 - `/api/modules/product-builds/products/:key` — product details (proxied)
 - `/api/modules/product-builds/drops` — list drops with filtering/pagination (proxied)
 - `/api/modules/product-builds/drops/:key` — drop details (proxied)

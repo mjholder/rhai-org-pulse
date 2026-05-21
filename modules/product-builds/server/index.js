@@ -73,6 +73,39 @@ module.exports = function registerRoutes(router, context) {
     res.json({ status: 'ok', baseUrl: trimmed });
   });
 
+  /**
+   * @openapi
+   * /api/modules/product-builds/health:
+   *   get:
+   *     tags: [Product Builds]
+   *     summary: Check AIPCC Dashboard API connectivity
+   *     responses:
+   *       200:
+   *         description: Health status with latency
+   */
+  router.get('/health', async function(req, res) {
+    const { baseUrl } = getConfig(readFromStorage);
+    if (!baseUrl) {
+      return res.json({ status: 'not_configured' });
+    }
+    const start = Date.now();
+    try {
+      const upstream = await fetch(baseUrl, {
+        signal: AbortSignal.timeout(5000),
+        headers: { 'Accept': 'application/json' }
+      });
+      res.json({
+        status: upstream.ok ? 'ok' : 'degraded',
+        latency: Date.now() - start
+      });
+    } catch {
+      res.json({
+        status: 'unavailable',
+        latency: Date.now() - start
+      });
+    }
+  });
+
   // --- Helper to get baseUrl for proxy ---
 
   function upstream(upstreamPath, req, res) {
