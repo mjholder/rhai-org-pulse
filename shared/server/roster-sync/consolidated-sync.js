@@ -97,12 +97,19 @@ async function runConsolidatedSync(storage) {
 
     // ─── Phase 1b: Validate ambiguous GitHub/GitLab usernames via API ───
     var allLdapPeople = [];
+    var seenUids = new Set();
     var ldapOrgKeys = Object.keys(ldapOrgs);
     for (var li = 0; li < ldapOrgKeys.length; li++) {
       var org = ldapOrgs[ldapOrgKeys[li]];
-      allLdapPeople.push(org.leader);
+      if (!seenUids.has(org.leader.uid)) {
+        allLdapPeople.push(org.leader);
+        seenUids.add(org.leader.uid);
+      }
       for (var lj = 0; lj < org.members.length; lj++) {
-        allLdapPeople.push(org.members[lj]);
+        if (!seenUids.has(org.members[lj].uid)) {
+          allLdapPeople.push(org.members[lj]);
+          seenUids.add(org.members[lj].uid);
+        }
       }
     }
 

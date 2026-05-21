@@ -137,6 +137,9 @@ async function validateAmbiguousUsernames(people) {
 
     // Clean up internal metadata
     delete person._usernameValidation;
+
+    // Delay between people to avoid API rate limiting
+    if (i < needsValidation.length - 1) await delay(BATCH_DELAY_MS);
   }
 
   console.log('[username-validation] Complete: GitHub validated=' + stats.githubValidated + ' cleared=' + stats.githubCleared +
