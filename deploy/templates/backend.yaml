@@ -30,11 +30,11 @@ parameters:
   - name: PVC_STORAGE_SIZE
     value: 1Gi
   - name: BACKEND_MEMORY_REQUEST
-    value: 128Mi
+    value: 256Mi
   - name: BACKEND_MEMORY_LIMIT
     value: 512Mi
   - name: BACKEND_CPU_REQUEST
-    value: 100m
+    value: 250m
   - name: BACKEND_CPU_LIMIT
     value: 500m
   - name: CRONJOB_SCHEDULE
@@ -488,7 +488,7 @@ objects:
                   resources:
                     requests:
                       memory: "32Mi"
-                      cpu: "10m"
+                      cpu: "25m"
                     limits:
                       memory: "64Mi"
                       cpu: "50m"
