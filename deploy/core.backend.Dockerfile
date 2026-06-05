@@ -9,7 +9,7 @@
 # Modules are auto-discovered at startup via filesystem scan.
 
 # Stage 1: Install system deps and node_modules
-FROM registry.access.redhat.com/ubi9/nodejs-20-minimal AS build
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal@sha256:75a2c4753c2475d715e31304ec1effef61770713e6e9fdafdcb80351dbdf3ba5 AS build
 
 USER 0
 
@@ -26,7 +26,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 # Stage 2: Red Hat Hardened Node.js runtime (distroless-like, minimal CVE surface)
-FROM registry.access.redhat.com/hi/nodejs:latest
+FROM registry.access.redhat.com/hi/nodejs@sha256:84f1aa12ae8250090f995824a5e2c3c21cbc544f6b8d774646d7287514741a52
 
 USER 0
 
