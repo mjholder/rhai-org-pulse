@@ -15,12 +15,6 @@ parameters:
     value: quay.io/openshift/origin-oauth-proxy:4.16
   - name: FRONTEND_REPLICAS
     value: "1"
-  - name: ROUTE_HOST
-    value: ""
-  - name: ROUTE_SHARD_LABEL
-    value: ""
-  - name: ROUTE_APPCODE_LABEL
-    value: HPOP-0001
   - name: NGINX_MEMORY_REQUEST
     value: 32Mi
   - name: NGINX_MEMORY_LIMIT
@@ -150,19 +144,3 @@ objects:
           name: proxy
           protocol: TCP
 
-  - apiVersion: route.openshift.io/v1
-    kind: Route
-    metadata:
-      name: team-tracker
-      labels:
-        shard: ${ROUTE_SHARD_LABEL}
-        paas.redhat.com/appcode: ${ROUTE_APPCODE_LABEL}
-    spec:
-      host: ${ROUTE_HOST}
-      to:
-        kind: Service
-        name: team-tracker
-      port:
-        targetPort: proxy
-      tls:
-        termination: reencrypt
