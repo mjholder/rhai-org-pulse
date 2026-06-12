@@ -36,8 +36,7 @@ objects:
     kind: ServiceAccount
     metadata:
       name: frontend-proxy
-      annotations:
-        serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"team-tracker"}}'
+      annotations: {}
 
   - apiVersion: apps/v1
     kind: Deployment
@@ -67,7 +66,8 @@ objects:
                 - --https-address=:4180
                 - --http-address=
                 - --provider=openshift
-                - --openshift-service-account=frontend-proxy
+                - --client-id=org-pulse-stage
+                - --client-secret-file=/etc/proxy/client-secret/secret
                 - --upstream=http://localhost:8080
                 - --tls-cert=/etc/tls/private/tls.crt
                 - --tls-key=/etc/tls/private/tls.key
@@ -81,6 +81,9 @@ objects:
                   readOnly: true
                 - name: cookie-secret
                   mountPath: /etc/proxy/cookie-secret
+                  readOnly: true
+                - name: client-secret
+                  mountPath: /etc/proxy/client-secret
                   readOnly: true
               resources:
                 requests:
@@ -127,6 +130,9 @@ objects:
             - name: cookie-secret
               secret:
                 secretName: frontend-proxy-cookie
+            - name: client-secret
+              secret:
+                secretName: proxy-auth-secret
 
   - apiVersion: v1
     kind: Service
